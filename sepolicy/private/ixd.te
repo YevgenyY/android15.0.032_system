@@ -1,0 +1,134 @@
+type ixd, domain;
+type ixd_exec, system_file_type, exec_type, file_type;
+type ixd_service, service_manager_type;
+
+typeattribute ixd coredomain;
+
+binder_use(ixd)
+binder_service(ixd)
+
+allow ixd ixd_exec:file execute_no_trans;
+allow ixd ixd_exec:file { read getattr map execute open };
+
+allow ixd shell_exec:file execute_no_trans;
+allow ixd shell_exec:file { read getattr map execute open };
+
+allow shell ixd_exec:file { read getattr map execute open };
+
+allow ixd ixd_service:service_manager { add find };
+
+allow system_server ixd_service:service_manager { find };
+
+allow platform_app ixd_service:service_manager { find };
+
+#========== OTP secret ========== 
+type otp_secret_data_file, file_type, data_file_type;
+allow ixd otp_secret_data_file:file r_file_perms;
+
+#========== Device owner ========== 
+allow ixd block_device:dir r_dir_perms;
+allow ixd serialno_prop:file r_file_perms;
+allow ixd shell_exec:file { read map execute open getattr };
+allow ixd shell_data_file:file { read write map execute open getattr setattr };
+allow ixd system_file:file execute_no_trans;
+allow ixd toolbox_exec:file { map execute read open getattr execute_no_trans };
+allow ixd device_policy_service:service_manager find;
+allow system_server ixd:fifo_file rw_file_perms;
+# Optional startup rules
+allow ixd servicemanager:binder call;
+allow ixd settings_service:service_manager find;
+allow ixd system_server:binder { call transfer };
+allow system_server ixd:binder call;
+allow ixd self:capability fsetid;
+
+
+#========== Update fetcher ========== 
+allow ixd dnsproxyd_socket:sock_file {read write };
+allow ixd netd:unix_stream_socket { connectto read write };
+allow ixd self:tcp_socket { connect getopt getattr create setopt read write };
+allow ixd self:udp_socket { connect setattr read write create };
+allow ixd serialno_prop:file { getattr map open read };
+allow ixd update_engine_service:service_manager find;
+allow ixd update_engine:binder { call transfer };
+allow ixd update_engine_exec:file { rw_file_perms execute execute_no_trans };
+allow update_engine ixd:binder call;
+allow update_engine ixd:fd use;
+domain_auto_trans(ixd, update_engine_exec, update_engine);
+
+
+allow ixd fwmarkd_socket:sock_file { read write };
+allow ixd port:tcp_socket { name_connect read write };
+allow netd ixd:tcp_socket { getopt read setopt write };
+allow netd ixd:fd use;
+
+#
+#========== ADB keys ========== 
+allow ixd adb_data_file:dir { rw_dir_perms create setattr getattr add_name };
+allow ixd adb_keys_file:file { rw_file_perms create setattr getattr };
+allow ixd adb_keys_file:dir { rw_dir_perms search };
+allow ixd mnt_vendor_file:dir search;
+allow ixd system_file:file mounton;
+allow ixd self:capability { dac_override dac_read_search sys_admin fowner };
+
+#========== Brick proto ========== 
+allow ixd super_block_device:blk_file rw_file_perms;
+
+#========== ixd_setup ============
+allow ixd labeledfs:filesystem { remount mount unmount relabelfrom };
+allow ixd linkerconfig_file:dir rw_dir_perms;
+allow ixd mnt_user_file:dir rw_dir_perms;
+allow ixd port:udp_socket name_bind;
+
+allow ixd system_file:file { mounton relabelfrom relabelto append read write getattr };
+allow ixd system_file:dir { add_name write };
+allow ixd adb_data_file:file { create rw_file_perms relabelfrom relabelto };
+allow ixd adb_data_file:dir { create_dir_perms mounton };
+allow ixd shell_data_file:dir search;
+
+allow ixd fuse:dir search;
+allow ixd fuse:file { open read };
+allow ixd mnt_user_file:lnk_file read;
+
+#======== EtherStatic APK functionality =======
+allow ixd self:capability { net_admin sys_module };
+allow ixd self:netlink_route_socket { bind create getattr nlmsg_write write read setopt };
+allow ixd self:udp_socket ioctl;
+
+
+allow ixd net_data_file:dir { getattr search open read write };
+allow ixd net_data_file:file rw_file_perms;
+
+
+#======== Iptables =======
+allow ixd system_data_file:dir rw_dir_perms;
+allow ixd system_data_file:file { rw_file_perms getattr lock };
+allow ixd system_data_file:file { create lock };
+allow ixd system_file:file { getattr lock rw_file_perms };
+
+allow ixd system_data_file:file create;
+allow ixd system_file:file lock;
+
+allow ixd proc_net:file { getattr rw_file_perms getattr };
+allow ixd self:rawip_socket { create getopt setopt read write };
+allow ixd usermodehelper:file r_file_perms;
+allow ixd self:capability { net_admin net_raw };
+
+# Работа с BPF (нужно для фильтрации трафика)
+allow ixd fs_bpf:dir { search r_dir_perms };
+allow ixd fs_bpf:file { read write rw_file_perms };
+allow ixd tmpfs:dir { search write add_name };
+
+# Разрешаем поиск в директории netd_shared внутри BPF
+allow ixd fs_bpf_netd_shared:dir { search };
+allow ixd fs_bpf_netd_shared:file { rw_file_perms getattr };
+allow ixd netd:unix_stream_socket connectto;
+allow ixd self:bpf { map_read map_write };
+allow ixd bpfloader:bpf { prog_run };
+
+
+# Write MAC
+#allow ixd nvdata_file:file rw_file_perms;
+#allow ixd nvdata_file:dir rw_dir_perms;
+#allow ixd nvdata_file:dir search;
+
+init_daemon_domain(ixd)

@@ -1,0 +1,18 @@
+// NFC Flag definitions
+aconfig_declarations {
+    name: "aconfig_system_nfc",
+    package: "com.android.nfc.nci.flags",
+    container: "system",
+    srcs: ["flags.aconfig"],
+}
+
+cc_aconfig_library {
+    name: "libnfc-nci_flags",
+    aconfig_declarations: "aconfig_system_nfc",
+    min_sdk_version: "35", // Make it 36 once available.
+    host_supported: true,
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+    ],
+}

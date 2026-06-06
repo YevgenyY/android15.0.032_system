@@ -1,0 +1,56 @@
+// Copyright (C) 2020 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "system_nfc_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["system_nfc_license"],
+}
+
+soong_config_module_type {
+    name: "libnfc_nci_default_conf_prebuilt_etc",
+    module_type: "prebuilt_etc",
+    config_namespace: "libnfc_nci_default_conf",
+    variables: [
+        "product_type",
+    ],
+    properties: [
+        "src",
+    ],
+}
+
+soong_config_string_variable {
+    name: "product_type",
+    values: [
+        "wearable",
+    ],
+}
+
+libnfc_nci_default_conf_prebuilt_etc {
+    name: "libnfc-nci.conf-default",
+    soong_config_variables: {
+        product_type: {
+            wearable: {
+                src: "libnfc-nci.wearable.conf",
+            },
+            conditions_default: {
+                src: "libnfc-nci.conf",
+            },
+        },
+    },
+    filename: "libnfc-nci.conf",
+}

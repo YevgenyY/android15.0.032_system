@@ -1,0 +1,100 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+rust_defaults {
+    name: "mmd_defaults",
+    srcs: [
+        "src/main.rs",
+    ],
+    rustlibs: [
+        "libanyhow",
+        "libbinder_rs",
+        "libflags_rust",
+        "liblogger",
+        "liblog_rust",
+        "libmmd",
+        "libmmd_flags_rust",
+        "libmockall",
+        "librustutils",
+        "mmd_aidl_interface-rust",
+    ],
+}
+
+rust_defaults {
+    name: "libmmd_defaults",
+    srcs: [
+        "src/lib.rs",
+    ],
+    rustlibs: [
+        "liblibc",
+        "libmockall",
+        "libnix",
+        "libthiserror",
+    ],
+}
+
+rust_binary {
+    name: "mm_daemon",
+    defaults: ["mmd_defaults"],
+    stem: "mmd",
+    init_rc: ["mmd.rc"],
+}
+
+rust_library {
+    name: "libmmd",
+    crate_name: "mmd",
+    defaults: ["libmmd_defaults"],
+    host_supported: true,
+}
+
+rust_test {
+    name: "mmd_unit_tests",
+    defaults: ["mmd_defaults"],
+    test_suites: ["general-tests"],
+    auto_gen_config: true,
+}
+
+rust_test_host {
+    name: "libmmd_unit_tests",
+    defaults: ["libmmd_defaults"],
+    test_suites: ["general-tests"],
+}
+
+aconfig_declarations {
+    name: "mmd_flags",
+    package: "android.mmd.flags",
+    container: "system",
+    srcs: ["flags.aconfig"],
+}
+
+rust_aconfig_library {
+    name: "libmmd_flags_rust",
+    crate_name: "mmd_flags",
+    aconfig_declarations: "mmd_flags",
+}
+
+java_aconfig_library {
+    name: "mmd_flags_lib",
+    aconfig_declarations: "mmd_flags",
+}
+
+aidl_interface {
+    name: "mmd_aidl_interface",
+    unstable: true,
+    srcs: [":mmd_aidl"],
+    local_include_dir: "aidl",
+    backend: {
+        rust: {
+            enabled: true,
+        },
+    },
+}
+
+filegroup {
+    name: "mmd_aidl",
+    srcs: [
+        "aidl/android/os/IMmd.aidl",
+    ],
+    path: "aidl",
+}

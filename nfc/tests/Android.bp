@@ -1,0 +1,88 @@
+package {
+    default_team: "trendy_team_fwk_nfc",
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "system_nfc_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["system_nfc_license"],
+}
+
+cc_test {
+    name: "libnfc-nci-tests",
+    include_dirs: [
+        "system/nfc/src/include",
+        "system/nfc/utils/include",
+        "system/nfc/src/nfc/include",
+        "system/nfc/src/gki/common",
+        "system/nfc/src/gki/ulinux",
+        "system/nfc/src/nfa/include",
+        "system/nfc/src/nfa/ce",
+        "system/nfc/src/nfa/dm",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    target: {
+        host_linux: {
+            cflags: ["-D_GNU_SOURCE"],
+        },
+        darwin: {
+            enabled: false,
+        },
+    },
+    sanitize: {
+        integer_overflow: true,
+        misc_undefined: ["bounds"],
+        scs: true,
+    },
+    srcs: [
+        "**/*.cc",
+    ],
+    static_libs: [
+        "libgmock",
+        "libnfc-nci",
+        "libnfcutils",
+        "android.hardware.nfc@1.0",
+        "android.hardware.nfc@1.1",
+        "android.hardware.nfc@1.2",
+        // Add for AIDL
+        "android.hardware.nfc-V2-ndk",
+        "libnfc-nci_flags",
+        "libstatslog_nfc",
+    ],
+    shared_libs: [
+        "libcutils",
+        "liblog",
+        "libdl",
+        "libz",
+        "libbase",
+        // Treble configuration
+        "libhidlbase",
+        "libutils",
+        "libbinder_ndk",
+        "libstatssocket",
+        "server_configurable_flags",
+        "libaconfig_storage_read_api_cc",
+    ],
+    test_suites: [
+        "general-tests",
+        "mts-nfc",
+    ],
+    test_config_template: "nfc_test_config_template.xml",
+    // Support multilib variants (using different suffix per sub-architecture), which is needed on
+    // build targets with secondary architectures, as the MTS test suite packaging logic flattens
+    // all test artifacts into a single `testcases` directory.
+    compile_multilib: "both",
+    multilib: {
+        lib32: {
+            suffix: "32",
+        },
+        lib64: {
+            suffix: "64",
+        },
+    },
+    auto_gen_config: true,
+    min_sdk_version: "current",
+}

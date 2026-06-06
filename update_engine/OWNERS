@@ -1,0 +1,13 @@
+set noparent
+
+# Android et. al. maintainers:
+deymo@google.com
+senj@google.com
+zhangkelvin@google.com
+
+# Chromium OS maintainers:
+kimjae@google.com
+
+
+# Chromium OS only:
+# COMPONENT: Internals>Installer
